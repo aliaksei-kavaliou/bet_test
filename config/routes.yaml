@@ -1,0 +1,4 @@
+api:
+  resource: 'routes/v1'
+  type: directory
+  prefix: /v1

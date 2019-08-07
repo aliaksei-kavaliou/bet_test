@@ -1,0 +1,4 @@
+bet.make:
+  path: /bet
+  methods: [POST]
+  controller: App\Controller\BetController::make

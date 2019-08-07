@@ -1,0 +1,15 @@
+framework:
+    messenger:
+        buses:
+            messenger.bus.default:
+                middleware:
+                    - 'messenger.middleware.validation'
+                    - 'App\Middleware\CanBetMiddleware'
+        transports:
+            async:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                retry_strategy:
+                    max_retries: 2
+
+        routing:
+            'App\Message\MessageInterface': async
