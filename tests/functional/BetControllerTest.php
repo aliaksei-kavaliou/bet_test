@@ -43,13 +43,41 @@ class BetControllerTest extends WebTestCase
                         ],
                     ],
                 ],
-                'expectedString' => 'Maximum stake amount is ',
+                'expectedString' => 'Maximum stake amount is 10000',
+            ],
+            [
+                'status' => 400,
+                'body' => [
+                    "player_id" => 2,
+                    "stake_amount" => "50",
+                    "selections" => [
+                        [
+                            "id" => 1,
+                            "odds" => "1.601",
+                        ],
+                    ],
+                ],
+                'expectedString' => 'Your previous action is not finished yet',
             ],
             [
                 'status' => 201,
                 'body' => [
                     "player_id" => 1,
                     "stake_amount" => "5",
+                    "selections" => [
+                        [
+                            "id" => 1,
+                            "odds" => "1.601",
+                        ],
+                    ],
+                ],
+                'expectedString' => null,
+            ],
+            [
+                'status' => 201,
+                'body' => [
+                    "player_id" => 3,
+                    "stake_amount" => "50",
                     "selections" => [
                         [
                             "id" => 1,

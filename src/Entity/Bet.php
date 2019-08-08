@@ -50,6 +50,7 @@ class Bet
     public function __construct()
     {
         $this->betSelections = new ArrayCollection();
+        $this->createdAt = new \DateTime();
     }
 
     public function getId(): ?int
