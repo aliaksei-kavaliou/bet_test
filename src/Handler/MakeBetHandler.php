@@ -57,18 +57,15 @@ class MakeBetHandler implements MessageHandlerInterface
             $bet->addBetSelection($betSelection);
         }
 
-        $balanceBefore = $player->getBalance();
-        $player->setBalance($balanceBefore - $message->getStakeAmount());
-        $balanceTransaction = new BalanceTransaction();
-        $balanceTransaction->setPlayer($player)
-            ->setAmountBefore($balanceBefore)
-            ->setAmount($player->getBalance());
-
-        $objectManager->persist($balanceTransaction);
         $objectManager->persist($bet);
         $objectManager->merge($player);
         $objectManager->flush();
 
         return $bet;
+    }
+
+    public function testInvoke(): void
+    {
+
     }
 }
