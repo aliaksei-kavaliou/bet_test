@@ -3,6 +3,7 @@
 namespace App\Message;
 
 use App\Exception\Errors;
+use App\Message\Dto\Selection;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
@@ -11,7 +12,7 @@ class MakeBetMessage
     public const MAX_WIN_AMOUNT = 20000;
     /**
      * @var int
-     * @Assert\NotBlank(message="User_id is mandatory field", payload={"level"="global"})
+     * @Assert\NotBlank(message = "User_id is mandatory field", payload = {"level"="global"})
      */
     private $playerId;
 
@@ -21,40 +22,32 @@ class MakeBetMessage
      * @Assert\Range(
      *     min = 0.3,
      *     max = 10000,
-     *     minMessage=Errors::MINIMUM_STAKE_AMOUNT,
-     *     maxMessage=Errors::MAXIMUM_STAKE_AMOUNT,
-     *     payload={"level"="global"}
+     *     minMessage = Errors::MINIMUM_STAKE_AMOUNT,
+     *     maxMessage = Errors::MAXIMUM_STAKE_AMOUNT,
+     *     payload = {"level"="global"}
      * )
      */
     private $stakeAmount;
 
     /**
-     * @var  array
-     * @Assert\NotBlank(payload={"level"="global"})
-     * @Assert\Count(min = 1, max = 20, payload={"level"="global"}),
-     * @Assert\All(
-     *     @Assert\Collection(
-     *          fields = {
-     *              "id" = {
-     *                  @Assert\NotBlank(payload={"level"="selection"}),
-     *              },
-     *              "odds" = {
-     *                  @Assert\Range(min = 1, max = 100000, payload={"level"="selection"})
-     *              }
-     *          }
-     *     )
-     * )
+     * @var  Selection[]
+     * @Assert\Type("array")
+     * @Assert\Count(min = 1, max = 20, payload = {"level"="global"})
+     * @Assert\Valid(payload = {"level"="selections"}, traverse = true)
      */
     private $selections;
 
     /**
-     * @Assert\Callback(payload={"level"="selection"})
+     * @Assert\Callback(payload = {"level"="selection"})
      * @param ExecutionContextInterface $context
      * @param                           $payload
      */
     public function validateSelections(ExecutionContextInterface $context, $payload): void
     {
-        $ids = \array_column($this->selections, 'id');
+        $ids = [];
+        foreach ($this->selections as $selection) {
+            $ids[] = $selection->getId();
+        }
 
         if (count($ids) !== count(\array_unique($ids))) {
             $context->buildViolation(Errors::DUPLICATE_SELECTION)
@@ -65,7 +58,7 @@ class MakeBetMessage
     }
 
     /**
-     * @Assert\Callback(payload={"level"="global"})
+     * @Assert\Callback(payload = {"level"="global"})
      * @param ExecutionContextInterface $context
      * @param                           $payload
      */
@@ -73,7 +66,7 @@ class MakeBetMessage
     {
         $win = $this->stakeAmount;
         foreach ($this->selections as $selection) {
-            $win *= $selection['odds'];
+            $win *= $selection->getOdds();
         }
 
         if ($this->stakeAmount > self::MAX_WIN_AMOUNT) {
@@ -96,7 +89,10 @@ class MakeBetMessage
     {
         $this->playerId = $playerId;
         $this->stakeAmount = $stakeAmount;
-        $this->selections = $selections;
+
+        foreach ($selections as $selection) {
+            $this->selections[] = new Selection($selection['id'], (float)$selection['odds']);
+        }
     }
 
     /**

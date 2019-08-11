@@ -8,6 +8,7 @@ use App\Entity\Player;
 use App\Handler\MakeBetHandler;
 use App\Message\MakeBetMessage;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Mapping\ClassMetadata;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Symfony\Bridge\Doctrine\RegistryInterface;
@@ -44,10 +45,11 @@ class MakeBetHandlerTest extends TestCase
 
     }
 
-
     public function testInvokeNoPlayer(): void
     {
         $tester = $this;
+        $this->em->getClassMetadata(Player::class)->shouldBeCalled()
+            ->willReturn($this->prophesize(ClassMetadata::class)->reveal());
         $this->em->find(Player::class, 1)->shouldBeCalled()->willReturn(null);
         $this->em->persist(Argument::type(Player::class))->shouldBeCalled()->will(
             function ($args) use ($tester) {
@@ -64,6 +66,7 @@ class MakeBetHandlerTest extends TestCase
 
     public function testInvoke(): void
     {
+        $this->em->getClassMetadata(Player::class)->shouldNotBeCalled();
         $player = new Player();
         $this->em->find(Player::class, 1)->shouldBeCalled()->willReturn($player);
         $this->em->persist(Argument::type(Player::class))->shouldNotBeCalled();

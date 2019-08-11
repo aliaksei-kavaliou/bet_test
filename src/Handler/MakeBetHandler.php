@@ -2,11 +2,11 @@
 
 namespace App\Handler;
 
-use App\Entity\BalanceTransaction;
 use App\Entity\Bet;
 use App\Entity\BetSelection;
 use App\Entity\Player;
 use App\Message\MakeBetMessage;
+use Doctrine\ORM\Mapping\ClassMetadata;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 
@@ -41,6 +41,8 @@ class MakeBetHandler implements MessageHandlerInterface
             $player = new Player();
             $player->setId($message->getPlayerId());
             $objectManager->persist($player);
+            $metadata = $objectManager->getClassMetaData(Player::class);
+            $metadata->setIdGeneratorType(ClassMetadata::GENERATOR_TYPE_NONE);
         }
 
         $bet = new Bet();
@@ -51,8 +53,8 @@ class MakeBetHandler implements MessageHandlerInterface
 
         foreach ($message->getSelections() as $selection) {
             $betSelection = new BetSelection();
-            $betSelection->setOdds((float)$selection['odds'])
-                ->setSelectionId($selection['id']);
+            $betSelection->setOdds((float)$selection->getOdds())
+                ->setSelectionId($selection->getId());
             $objectManager->persist($betSelection);
             $bet->addBetSelection($betSelection);
         }
@@ -66,6 +68,5 @@ class MakeBetHandler implements MessageHandlerInterface
 
     public function testInvoke(): void
     {
-
     }
 }

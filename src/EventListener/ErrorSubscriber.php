@@ -34,18 +34,7 @@ class ErrorSubscriber implements EventSubscriberInterface
 
         switch (true) {
             case $exception instanceof ValidationFailedException:
-                foreach ($exception->getViolations() as $violation) {
-                    $message = $violation->getMessage();
-                    $code = is_numeric($message) ? $message : Errors::UNKNOWN_ERROR;
-                    $errors[$violation->getConstraint()->payload['level']][] = [
-                        'code' => $code,
-                        'message' => str_replace(
-                            \array_keys($violation->getParameters()),
-                            \array_values($violation->getParameters()),
-                            (Errors::$errorMessages[$message] ?? $message)
-                        ),
-                    ];
-                }
+                $this->processValidationError($exception, $errors);
                 break;
 
             case $exception instanceof HandledExceptionInterface:
@@ -67,5 +56,61 @@ class ErrorSubscriber implements EventSubscriberInterface
         $response = new JsonResponse($badResponse, Response::HTTP_BAD_REQUEST);
 
         $event->setResponse($response);
+    }
+
+    /**
+     * @param       $exception
+     * @param array $errors
+     */
+    private function processValidationError($exception, array &$errors): void
+    {
+        foreach ($exception->getViolations() as $violation) {
+            $message = $violation->getMessage();
+            $code = is_numeric($message) ? $message : Errors::UNKNOWN_ERROR;
+            $level = $violation->getConstraint()->payload['level'];
+            $error = [
+                'code' => $code,
+                'message' => str_replace(
+                    \array_keys($violation->getParameters()),
+                    \array_values($violation->getParameters()),
+                    (Errors::$errorMessages[$message] ?? $message)
+                ),
+            ];
+
+            if ('selection' === $level) {
+                $selections = $violation->getRoot()->getSelections();
+                $matches = [];
+                \preg_match("/\[(\d+)\]/", $violation->getPropertyPath(), $matches);
+                $key = $matches[1] ?? null;
+
+                if (null !== $key && \array_key_exists($key, $selections)) {
+                    $this->composeSelectionErrors($errors, $key, $selections[$key], $error);
+                    continue;
+                }
+
+                foreach ($selections as $key => $selection) {
+                    $this->composeSelectionErrors($errors, $key, $selection, $error);
+                }
+
+                continue;
+            }
+
+            $errors[$level][] = $error;
+        }
+    }
+
+    /**
+     * @param array $errors
+     * @param       $key
+     * @param       $selection
+     * @param array $error
+     */
+    private function composeSelectionErrors(array &$errors, $key, $selection, array $error): void
+    {
+        $errors['selection'][$key] = $errors['selection'][$key] ?? [
+                'id' => $selection->getId(),
+                'odds' => $selection->getOdds()
+            ];
+        $errors['selection'][$key]['errors'][] = $error;
     }
 }
