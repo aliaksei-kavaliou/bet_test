@@ -38,13 +38,12 @@ class CanBetMiddleware implements MiddlewareInterface
     {
         /** @var CanBetStamp $stamp */
         $stamp = $envelope->last(CanBetStamp::class);
-        $isReceivedMessage = null !== $envelope->last(ReceivedStamp::class);
 
-        if ($isReceivedMessage || !$stamp) {
+        if (!$stamp) {
             return $stack->next()->handle($envelope, $stack);
         }
 
-        $user = $this->registry->getManager()->find(Player::class, $stamp->getUserId());
+        $user = $this->registry->getManager()->find(Player::class, $stamp->getPlayerId());
 
         if ((!$user && Player::DEFAULT_BALANCE < $stamp->getStakeAmount())
             || ($user && !$this->betHelper->playerHasEnoughMoney($user, $stamp->getStakeAmount()))

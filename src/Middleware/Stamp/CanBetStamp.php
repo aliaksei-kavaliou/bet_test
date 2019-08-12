@@ -7,7 +7,7 @@ use Symfony\Component\Messenger\Stamp\StampInterface;
 class CanBetStamp implements StampInterface
 {
     /** @var int|null */
-    private $userId;
+    private $playerId;
 
     /** @var float|null */
     private $stakeAmount;
@@ -15,21 +15,21 @@ class CanBetStamp implements StampInterface
     /**
      * CanBetStamp constructor.
      *
-     * @param int|null   $userId
+     * @param int|null   $playerId
      * @param float|null $stakeAmount
      */
-    public function __construct(?int $userId, ?float $stakeAmount)
+    public function __construct(?int $playerId, ?float $stakeAmount)
     {
-        $this->userId = $userId;
+        $this->playerId = $playerId;
         $this->stakeAmount = $stakeAmount;
     }
 
     /**
      * @return int|null
      */
-    public function getUserId(): ?int
+    public function getPlayerId(): ?int
     {
-        return $this->userId;
+        return $this->playerId;
     }
 
     /**
