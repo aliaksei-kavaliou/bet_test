@@ -26,13 +26,19 @@ class Player
     private $balance = self::DEFAULT_BALANCE;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Bet", mappedBy="player")
+     * @ORM\OneToMany(targetEntity="App\Entity\Bet", mappedBy="player", cascade={"persist"})
      */
     private $bets;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\BalanceTransaction", mappedBy="player", cascade={"persist"})
+     */
+    private $transactions;
 
     public function __construct()
     {
         $this->bets = new ArrayCollection();
+        $this->transactions = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -88,6 +94,42 @@ class Player
             // set the owning side to null (unless already changed)
             if ($bet->getPlayer() === $this) {
                 $bet->setPlayer(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|BalanceTransaction[]
+     */
+    public function getTransactions()
+    {
+        return $this->transactions;
+    }
+
+    /**
+     * @param BalanceTransaction $balanceTransaction
+     *
+     * @return Player
+     */
+    public function addTransaction(BalanceTransaction $balanceTransaction): self
+    {
+        if (!$this->transactions->contains($balanceTransaction)) {
+            $this->transactions[] = $balanceTransaction;
+            $balanceTransaction->setPlayer($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTransaction(BalanceTransaction $balanceTransaction): self
+    {
+        if ($this->transactions->contains($balanceTransaction)) {
+            $this->transactions->removeElement($balanceTransaction);
+            // set the owning side to null (unless already changed)
+            if ($balanceTransaction->getPlayer() === $this) {
+                $balanceTransaction->setPlayer(null);
             }
         }
 

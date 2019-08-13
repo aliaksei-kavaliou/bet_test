@@ -17,17 +17,17 @@ class BalanceTransaction
     private $id;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="decimal", scale=2)
      */
     private $amount;
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(type="decimal", scale=2, nullable=true)
      */
     private $amount_before;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Player")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Player", inversedBy="transactions")
      * @ORM\JoinColumn(nullable=false)
      */
     private $player;

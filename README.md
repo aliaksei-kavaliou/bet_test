@@ -11,7 +11,7 @@ Run
 ---
     $ docker-compose build && docker-compose up -d
     $ docker-compose exec php composer install
-    $ docker-compose exec php bin/console migration:migrate
+    $ docker-compose exec php bin/console doctrine:migration:migrate
     $ docker-compose exec php bin/console massenger:consume async -vv
     
 Test

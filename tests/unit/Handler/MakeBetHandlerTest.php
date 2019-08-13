@@ -58,7 +58,7 @@ class MakeBetHandlerTest extends TestCase
             }
         );
 
-        $message = new MakeBetMessage(1, 100.0, [['id' => 1, 'odds' => '1.623'], ['id' => 2, 'odds' => '1.623']]);
+        $message = new MakeBetMessage(1, '100.0', [['id' => 1, 'odds' => '1.623'], ['id' => 2, 'odds' => '1.623']]);
         $result = $this->handler->__invoke($message);
         $this->assertInstanceOf(Bet::class, $result);
         $this->assertCount(2, $result->getBetSelections());
@@ -70,7 +70,7 @@ class MakeBetHandlerTest extends TestCase
         $player = new Player();
         $this->em->find(Player::class, 1)->shouldBeCalled()->willReturn($player);
         $this->em->persist(Argument::type(Player::class))->shouldNotBeCalled();
-        $message = new MakeBetMessage(1, 100.0, [['id' => 1, 'odds' => '1.623'], ['id' => 2, 'odds' => '1.623']]);
+        $message = new MakeBetMessage(1, '100.0', [['id' => 1, 'odds' => '1.623'], ['id' => 2, 'odds' => '1.623']]);
         $result = $this->handler->__invoke($message);
         $this->assertInstanceOf(Bet::class, $result);
         $this->assertSame($player, $result->getPlayer());

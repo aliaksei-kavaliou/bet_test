@@ -6,24 +6,24 @@ use App\Entity\Bet;
 
 class FinalizeBetMessage implements MessageInterface
 {
-    /** @var Bet */
-    private $bet;
+    /** @var int */
+    private $betId;
 
     /**
      * FinalizeBetMessage constructor.
      *
-     * @param Bet $bet
+     * @param int $betId
      */
-    public function __construct(Bet $bet)
+    public function __construct(int $betId)
     {
-        $this->bet = $bet;
+        $this->betId = $betId;
     }
 
     /**
-     * @return Bet
+     * @return int
      */
-    public function getBet(): Bet
+    public function getBetId(): int
     {
-        return $this->bet;
+        return $this->betId;
     }
 }

@@ -21,7 +21,7 @@ class FinalizeBetHandler implements MessageHandlerInterface
      *
      * @param RegistryInterface $registry
      */
-    public function __construct(RegistryInterface $registry, int $sleepInterval = 30)
+    public function __construct(RegistryInterface $registry, int $sleepInterval = 0)
     {
         $this->registry = $registry;
         $this->sleepInterval = $sleepInterval;
@@ -33,22 +33,27 @@ class FinalizeBetHandler implements MessageHandlerInterface
     public function __invoke(FinalizeBetMessage $message): void
     {
         sleep($this->sleepInterval);
-
-        $bet = $message->getBet();
-        $bet->setStatus(Bet::STATUS_APPROVED);
         $objectManager = $this->registry->getManager();
 
+        $bet = $objectManager->find(Bet::class, $message->getBetId());
+
+        if (!$bet) {
+            return;
+        }
+
+        $bet->setStatus(Bet::STATUS_APPROVED);
         $player = $bet->getPlayer();
         $balanceBefore = $player->getBalance();
         $player->setBalance($balanceBefore - $bet->getStakeAmount());
         $balanceTransaction = new BalanceTransaction();
-        $balanceTransaction->setPlayer($player)
-            ->setAmountBefore($balanceBefore)
+        $balanceTransaction->setAmountBefore($balanceBefore)
             ->setAmount($player->getBalance());
 
+        $player->addTransaction($balanceTransaction);
+
+        $objectManager->persist($bet);
         $objectManager->persist($balanceTransaction);
-        $objectManager->merge($bet);
-        $objectManager->merge($player);
+        $objectManager->persist($player);
         $objectManager->flush();
     }
 }

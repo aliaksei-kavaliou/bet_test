@@ -12,30 +12,42 @@ class MakeBetMessage
     public const MAX_WIN_AMOUNT = 20000;
     /**
      * @var int
-     * @Assert\NotBlank(message = "User_id is mandatory field", payload = {"level"="global"})
+     * @Assert\Type(type="integer", payload={"level"="global"}, message=Errors::BAD_STRUCTURE)
+     * @Assert\NotBlank(
+     *     payload={"level"="global"},
+     *     message=Errors::BAD_STRUCTURE
+     * )
      */
     private $playerId;
 
     /**
-     * @var float
-     * @Assert\NotBlank(payload={"level"="global"})
+     * @var mixed
+     * @Assert\NotBlank(payload={"level"="global"}, message=Errors::BAD_STRUCTURE)
+     * @Assert\Type(type="string", payload={"level"="global"}, message=Errors::BAD_STRUCTURE)
+     * @Assert\Regex(pattern="/^(\d+(\.\d{1,2})?)$/", payload={"level"="global"}, message=Errors::BAD_STRUCTURE)
      * @Assert\Range(
-     *     min = 0.3,
-     *     max = 10000,
-     *     minMessage = Errors::MINIMUM_STAKE_AMOUNT,
-     *     maxMessage = Errors::MAXIMUM_STAKE_AMOUNT,
-     *     payload = {"level"="global"}
+     *     min=0.3,
+     *     max=10000,
+     *     minMessage=Errors::MINIMUM_STAKE_AMOUNT,
+     *     maxMessage=Errors::MAXIMUM_STAKE_AMOUNT,
+     *     payload={"level"="global"}
      * )
      */
     private $stakeAmount;
 
     /**
      * @var  Selection[]
-     * @Assert\Type("array")
-     * @Assert\Count(min = 1, max = 20, payload = {"level"="global"})
-     * @Assert\Valid(payload = {"level"="selections"}, traverse = true)
+     * @Assert\Type(type="array", payload={"level"="global"}, message=Errors::BAD_STRUCTURE)
+     * @Assert\Count(
+     *     min=1,
+     *     max=20,
+     *     payload={"level"="global"},
+     *     minMessage=Errors::MINIMUM_SELECTIONS_NUMBER,
+     *     maxMessage=Errors::MAXIMUM_SELECTIONS_NUMBER,
+     * )
+     * @Assert\Valid(payload={"level"="selections"}, traverse=true)
      */
-    private $selections;
+    private $selections = [];
 
     /**
      * @Assert\Callback(payload = {"level"="selection"})
@@ -82,31 +94,35 @@ class MakeBetMessage
      * MakeBetMessage constructor.
      *
      * @param int|null   $playerId
-     * @param float|null $stakeAmount
+     * @param string|null $stakeAmount
      * @param array|null $selections
      */
-    public function __construct(?int $playerId, ?float $stakeAmount, ?array $selections)
+    public function __construct($playerId, $stakeAmount, $selections)
     {
         $this->playerId = $playerId;
         $this->stakeAmount = $stakeAmount;
 
+        if (!is_array($selections)) {
+            return;
+        }
+
         foreach ($selections as $selection) {
-            $this->selections[] = new Selection($selection['id'], (float)$selection['odds']);
+            $this->selections[] = new Selection($selection['id'] ?? null, $selection['odds'] ?? null);
         }
     }
 
     /**
      * @return int
      */
-    public function getPlayerId(): int
+    public function getPlayerId()
     {
         return $this->playerId;
     }
 
     /**
-     * @return float
+     * @return mixed
      */
-    public function getStakeAmount(): float
+    public function getStakeAmount()
     {
         return $this->stakeAmount;
     }

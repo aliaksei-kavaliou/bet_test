@@ -40,10 +40,11 @@ class FinalizeBetTest extends TestCase
         $bet->setStatus(Bet::STATUS_PENDING)
             ->setStakeAmount(60)
             ->setPlayer($player);
-        $message = new FinalizeBetMessage($bet);
+        $message = new FinalizeBetMessage(1);
 
-        $this->em->merge($player)->shouldBeCalled();
-        $this->em->merge($bet)->shouldBeCalled();
+        $this->em->find(Bet::class, 1)->willReturn($bet);
+        $this->em->persist($player)->shouldBeCalled();
+        $this->em->persist($bet)->shouldBeCalled();
         $this->em->persist(Argument::type(BalanceTransaction::class))->shouldBeCalled();
         $this->em->flush()->shouldBeCalled();
 

@@ -23,16 +23,16 @@ class BetController
     {
         $data = \json_decode($request->getContent(), true);
         $playerId = $data['player_id'] ?? null;
-        $stakeAmount = (float)$data['stake_amount'] ?? null;
+        $stakeAmount = $data['stake_amount'] ?? null;
         $message = new MakeBetMessage(
             $playerId,
             $stakeAmount,
             $data['selections'] ?? null
         );
 
-        $bet = $messageBus->dispatch($message, [new CanBetStamp($playerId, $stakeAmount)])
+        $bet = $messageBus->dispatch($message, [new CanBetStamp($playerId, (float)$stakeAmount)])
             ->last(HandledStamp::class)->getResult();
-        $messageBus->dispatch(new FinalizeBetMessage($bet));
+        $messageBus->dispatch(new FinalizeBetMessage($bet->getId()));
 
         return new JsonResponse([], Response::HTTP_CREATED);
     }

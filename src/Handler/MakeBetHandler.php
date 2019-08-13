@@ -46,7 +46,7 @@ class MakeBetHandler implements MessageHandlerInterface
         }
 
         $bet = new Bet();
-        $bet->setStakeAmount($message->getStakeAmount())
+        $bet->setStakeAmount((float)$message->getStakeAmount())
             ->setCreatedAt(new \DateTime());
 
         $player->addBet($bet);

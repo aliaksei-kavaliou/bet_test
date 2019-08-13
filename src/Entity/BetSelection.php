@@ -17,7 +17,7 @@ class BetSelection
     private $id;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="decimal", scale=3)
      */
     private $odds;
 

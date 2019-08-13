@@ -22,7 +22,7 @@ class Bet
     private $id;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="decimal", scale=2)
      */
     private $stakeAmount;
 
@@ -32,7 +32,7 @@ class Bet
     private $createdAt;
 
     /**
-     * @ORM\OneToMany(targetEntity="BetSelection", mappedBy="bet", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity="BetSelection", mappedBy="bet", orphanRemoval=true, cascade={"persist"})
      */
     private $betSelections;
 
