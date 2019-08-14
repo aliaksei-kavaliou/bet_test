@@ -16,7 +16,7 @@ Run
     
 Test
 ---
-    $ docker-compose exec php bin/console doctrine:schema:update --env test
+    $ docker-compose exec php bin/console doctrine:schema:update --env test --force
     $ docker-compose exec php bin/run_test
     
 Api
