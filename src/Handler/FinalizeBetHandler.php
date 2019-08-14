@@ -21,7 +21,7 @@ class FinalizeBetHandler implements MessageHandlerInterface
      *
      * @param RegistryInterface $registry
      */
-    public function __construct(RegistryInterface $registry, int $sleepInterval = 0)
+    public function __construct(RegistryInterface $registry, int $sleepInterval)
     {
         $this->registry = $registry;
         $this->sleepInterval = $sleepInterval;
